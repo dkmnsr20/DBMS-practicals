@@ -29,8 +29,13 @@ INSERT INTO STUDENT VALUES
 ('S10001','Aman','CS','2004-05-10'),
 ('S10002','Ankit','Chemistry','2003-02-15'),
 ('S10003','Riya','CS','2005-07-19'),
+('S10004','Rahul','Math','2002-01-11'),
+('S10005','Sneha','Physics','2004-03-25'),
+('S10006','Karan','CS','2003-09-14'),
+('S10007','Pooja','Chemistry','2005-06-30'),
+('S10008','Vikas','Math','2002-12-09'),
 ('X10009','Zara','Math','2002-11-20'),
-('Z10009','Priya','Chemistry','2001-08-25');
+('Z10010','Priya','Chemistry','2001-08-25');
 
 INSERT INTO SOCIETY VALUES
 ('S1','NSS','Gupta',50),
@@ -40,10 +45,16 @@ INSERT INTO SOCIETY VALUES
 
 INSERT INTO ENROLLMENT VALUES
 ('S10001','S1','2024-01-10'),
-('S10001','S2','2024-01-12'),
-('S10002','S1','2024-01-15'),
-('S10003','S3','2024-01-18'),
-('X10009','S2','2024-01-20');
+('S10001','S4','2024-01-10'),
+('S10002','S1','2024-01-11'),
+('S10003','S1','2024-01-12'),
+('S10004','S1','2024-01-13'),
+('S10005','S1','2024-01-14'),
+('S10006','S1','2024-01-15'),
+('S10007','S2','2024-01-16'),
+('S10008','S2','2024-01-17'),
+('X10009','S3','2024-01-18');
+
 
 ==================================================
 
@@ -57,6 +68,11 @@ OUTPUT:
 Aman
 Ankit
 Riya
+Rahul
+Sneha
+Karan
+Pooja
+Vikas
 Zara
 
 ==================================================
@@ -66,7 +82,7 @@ SELECT SocName FROM SOCIETY;
 
 OUTPUT:
 NSS
-Debating
+Debating 
 Dancing
 Sashakt
 
@@ -84,7 +100,7 @@ Ankit
 ==================================================
 
 Q4. Retrieve students studying in CS or Chemistry
-SELECT *
+SELECT StudentName
 FROM STUDENT
 WHERE Course IN ('CS','Chemistry');
 
@@ -92,30 +108,31 @@ OUTPUT:
 Aman
 Ankit
 Riya
+Karan
+Pooja
 Priya
 
 ==================================================
 
 Q5. Retrieve students whose roll no starts with X or Z and ends with 9
-SELECT *
+SELECT StudentName
 FROM STUDENT
 WHERE (RollNo LIKE 'X%' OR RollNo LIKE 'Z%')
 AND RollNo LIKE '%9';
 
 OUTPUT:
-X10009
-Z10009
+Zara
 
 ==================================================
 
 Q6. Find society details with more than N TotalSeats
 SELECT *
 FROM SOCIETY
-WHERE TotalSeats > 30;
+WHERE TotalSeats > 30;--Here N is 30
 
 OUTPUT:
-NSS
-Debating
+S1|NSS|Gupta|50
+S2|Debating|Sharma|40
 
 ==================================================
 
@@ -124,8 +141,13 @@ UPDATE SOCIETY
 SET MentorName='Verma'
 WHERE SocName='NSS';
 
+Select * from SOCIETY;
+
 OUTPUT:
-Query OK
+S1|NSS|Verma|50
+S2|Debating|Sharma|40
+S3|Dancing|Verma|30
+S4|Sashakt|Mehta|20
 
 ==================================================
 
@@ -138,7 +160,7 @@ GROUP BY SocName
 HAVING COUNT(*) > 5;
 
 OUTPUT:
-No rows found
+NSS
 
 ==================================================
 
@@ -154,7 +176,7 @@ ORDER BY DOB DESC
 LIMIT 1;
 
 OUTPUT:
-Aman
+Riya
 
 ==================================================
 
@@ -183,7 +205,7 @@ LIMIT 2;
 
 OUTPUT:
 Dancing
-NSS
+Sashakt
 
 ==================================================
 
@@ -199,13 +221,14 @@ Priya
 ==================================================
 
 Q13. Students enrolled in at least two societies
-SELECT RollNo
-FROM ENROLLMENT
-GROUP BY RollNo
-HAVING COUNT(SID) >= 2;
+SELECT S.StudentName
+FROM STUDENT S
+JOIN ENROLLMENT E ON S.RollNo = E.RollNo
+GROUP BY S.RollNo, S.StudentName
+HAVING COUNT(E.SID) >= 2;
 
 OUTPUT:
-S10001
+Aman
 
 ==================================================
 
@@ -232,11 +255,16 @@ JOIN SOCIETY SO
 ON E.SID = SO.SocID;
 
 OUTPUT:
-Aman NSS
-Aman Debating
-Ankit NSS
-Riya Dancing
-Zara Debating
+Aman|NSS
+Aman|Sashakt
+Ankit|NSS
+Riya|NSS
+Rahul|NSS
+Sneha|NSS
+Karan|NSS
+Pooja|Debating
+Vikas|Debating
+Zara|Dancing
 
 ==================================================
 
@@ -251,7 +279,8 @@ WHERE SocName IN ('Debating','Dancing','Sashakt');
 
 OUTPUT:
 Aman
-Riya
+Pooja
+Vikas
 Zara
 
 ==================================================
@@ -288,10 +317,10 @@ ON S.SocID = E.SID
 GROUP BY SocName, TotalSeats;
 
 OUTPUT:
-NSS 48
-Debating 38
-Dancing 29
-Sashakt 20
+Dancing|29
+Debating|38
+NSS|44
+Sashakt|19
 
 ==================================================
 
@@ -299,17 +328,33 @@ Q20. Increment Total Seats by 10%
 UPDATE SOCIETY
 SET TotalSeats = TotalSeats + (TotalSeats * 0.10);
 
+Select * from SOCIETY
+
 OUTPUT:
-Query OK
+S1|NSS|Gupta|55
+S2|Debating|Sharma|44
+S3|Dancing|Verma|33
+S4|Sashakt|Mehta|22
 
 ==================================================
 
 Q21. Add FeesPaid field
 ALTER TABLE ENROLLMENT
-ADD FeesPaid VARCHAR(3);
+ADD FeesPaid VARCHAR(3) DEFAULT 'Yes';
+
+Select * from ENROLLMENT;
 
 OUTPUT:
-Query OK
+S10001|S1|2024-01-10|Yes
+S10001|S4|2024-01-10|Yes
+S10002|S1|2024-01-11|Yes
+S10003|S1|2024-01-12|Yes
+S10004|S1|2024-01-13|Yes
+S10005|S1|2024-01-14|Yes
+S10006|S1|2024-01-15|Yes
+S10007|S2|2024-01-16|Yes
+S10008|S2|2024-01-17|Yes
+X10009|S3|2024-01-18|Yes
 
 ==================================================
 
@@ -318,8 +363,19 @@ UPDATE ENROLLMENT
 SET DateOfEnrollment='2018-01-15'
 WHERE SID='S1';
 
+Select * from ENROLLMENT;
+
 OUTPUT:
-Query OK
+S10001|S1|2018-01-15
+S10001|S4|2024-01-10
+S10002|S1|2018-01-15
+S10003|S1|2018-01-15
+S10004|S1|2018-01-15
+S10005|S1|2018-01-15
+S10006|S1|2018-01-15
+S10007|S2|2024-01-16
+S10008|S2|2024-01-17
+X10009|S3|2024-01-18
 
 ==================================================
 
@@ -357,7 +413,7 @@ HAVING COUNT(*) > 5
 ) AS T;
 
 OUTPUT:
-0
+1
 
 ==================================================
 
@@ -365,9 +421,19 @@ Q26. Add Mobile number field
 ALTER TABLE STUDENT
 ADD MobileNo VARCHAR(10)
 DEFAULT '9999999999';
+Select * from STUDENT;
 
 OUTPUT:
-Query OK
+S10001|Aman|CS|2004-05-10|9999999999
+S10002|Ankit|Chemistry|2003-02-15|9999999999
+S10003|Riya|CS|2005-07-19|9999999999
+S10004|Rahul|Math|2002-01-11|9999999999
+S10005|Sneha|Physics|2004-03-25|9999999999
+S10006|Karan|CS|2003-09-14|9999999999
+S10007|Pooja|Chemistry|2005-06-30|9999999999
+S10008|Vikas|Math|2002-12-09|9999999999
+X10009|Zara|Math|2002-11-20|9999999999
+Z10010|Priya|Chemistry|2001-08-25|9999999999
 
 ==================================================
 
@@ -377,7 +443,7 @@ FROM STUDENT
 WHERE TIMESTAMPDIFF(YEAR,DOB,CURDATE()) > 20;
 
 OUTPUT:
-3
+10
 
 ==================================================
 
@@ -389,7 +455,7 @@ ON S.RollNo = E.RollNo
 WHERE YEAR(DOB)=2001;
 
 OUTPUT:
-No rows found
+Priya
 
 ==================================================
 
@@ -403,7 +469,7 @@ GROUP BY SocName
 HAVING COUNT(*) >= 5;
 
 OUTPUT:
-0
+No rows found
 
 ==================================================
 
@@ -419,9 +485,8 @@ ON S.SocID = E.SID
 GROUP BY SocName, MentorName, TotalSeats;
 
 OUTPUT:
-NSS Gupta 50 2 48
-Debating Sharma 40 2 38
-Dancing Verma 30 1 29
-Sashakt Mehta 20 0 20
-
+Dancing|Verma|30|1|29
+Debating|Sharma|40|2|38
+NSS|Gupta|50|6|44
+Sashakt|Mehta|20|1|19
 ==================================================
