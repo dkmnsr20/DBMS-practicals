@@ -1,0 +1,427 @@
+
+SQL PRACTICAL COMPLETE FILE
+===========================
+
+SETUP
+=====
+
+CREATE TABLE STUDENT(
+RollNo CHAR(6) PRIMARY KEY,
+StudentName VARCHAR(20),
+Course VARCHAR(10),
+DOB DATE
+);
+
+CREATE TABLE SOCIETY(
+SocID CHAR(6) PRIMARY KEY,
+SocName VARCHAR(20),
+MentorName VARCHAR(15),
+TotalSeats INT
+);
+
+CREATE TABLE ENROLLMENT(
+RollNo CHAR(6),
+SID CHAR(6),
+DateOfEnrollment DATE
+);
+
+INSERT INTO STUDENT VALUES
+('S10001','Aman','CS','2004-05-10'),
+('S10002','Ankit','Chemistry','2003-02-15'),
+('S10003','Riya','CS','2005-07-19'),
+('X10009','Zara','Math','2002-11-20'),
+('Z10009','Priya','Chemistry','2001-08-25');
+
+INSERT INTO SOCIETY VALUES
+('S1','NSS','Gupta',50),
+('S2','Debating','Sharma',40),
+('S3','Dancing','Verma',30),
+('S4','Sashakt','Mehta',20);
+
+INSERT INTO ENROLLMENT VALUES
+('S10001','S1','2024-01-10'),
+('S10001','S2','2024-01-12'),
+('S10002','S1','2024-01-15'),
+('S10003','S3','2024-01-18'),
+('X10009','S2','2024-01-20');
+
+==================================================
+
+Q1. Retrieve names of students enrolled in any society
+SELECT DISTINCT StudentName
+FROM STUDENT S
+JOIN ENROLLMENT E
+ON S.RollNo = E.RollNo;
+
+OUTPUT:
+Aman
+Ankit
+Riya
+Zara
+
+==================================================
+
+Q2. Retrieve all society names
+SELECT SocName FROM SOCIETY;
+
+OUTPUT:
+NSS
+Debating
+Dancing
+Sashakt
+
+==================================================
+
+Q3. Retrieve students names starting with the letter A
+SELECT StudentName
+FROM STUDENT
+WHERE StudentName LIKE 'A%';
+
+OUTPUT:
+Aman
+Ankit
+
+==================================================
+
+Q4. Retrieve students studying in CS or Chemistry
+SELECT *
+FROM STUDENT
+WHERE Course IN ('CS','Chemistry');
+
+OUTPUT:
+Aman
+Ankit
+Riya
+Priya
+
+==================================================
+
+Q5. Retrieve students whose roll no starts with X or Z and ends with 9
+SELECT *
+FROM STUDENT
+WHERE (RollNo LIKE 'X%' OR RollNo LIKE 'Z%')
+AND RollNo LIKE '%9';
+
+OUTPUT:
+X10009
+Z10009
+
+==================================================
+
+Q6. Find society details with more than N TotalSeats
+SELECT *
+FROM SOCIETY
+WHERE TotalSeats > 30;
+
+OUTPUT:
+NSS
+Debating
+
+==================================================
+
+Q7. Update mentor name of a society
+UPDATE SOCIETY
+SET MentorName='Verma'
+WHERE SocName='NSS';
+
+OUTPUT:
+Query OK
+
+==================================================
+
+Q8. Society names with more than five students enrolled
+SELECT SocName
+FROM SOCIETY S
+JOIN ENROLLMENT E
+ON S.SocID = E.SID
+GROUP BY SocName
+HAVING COUNT(*) > 5;
+
+OUTPUT:
+No rows found
+
+==================================================
+
+Q9. Youngest student enrolled in NSS
+SELECT StudentName
+FROM STUDENT S
+JOIN ENROLLMENT E
+ON S.RollNo = E.RollNo
+JOIN SOCIETY SO
+ON E.SID = SO.SocID
+WHERE SO.SocName='NSS'
+ORDER BY DOB DESC
+LIMIT 1;
+
+OUTPUT:
+Aman
+
+==================================================
+
+Q10. Most popular society
+SELECT SocName
+FROM SOCIETY S
+JOIN ENROLLMENT E
+ON S.SocID = E.SID
+GROUP BY SocName
+ORDER BY COUNT(*) DESC
+LIMIT 1;
+
+OUTPUT:
+NSS
+
+==================================================
+
+Q11. Two least popular societies
+SELECT SocName
+FROM SOCIETY S
+JOIN ENROLLMENT E
+ON S.SocID = E.SID
+GROUP BY SocName
+ORDER BY COUNT(*) ASC
+LIMIT 2;
+
+OUTPUT:
+Dancing
+NSS
+
+==================================================
+
+Q12. Students not enrolled in any society
+SELECT StudentName
+FROM STUDENT
+WHERE RollNo NOT IN
+(SELECT RollNo FROM ENROLLMENT);
+
+OUTPUT:
+Priya
+
+==================================================
+
+Q13. Students enrolled in at least two societies
+SELECT RollNo
+FROM ENROLLMENT
+GROUP BY RollNo
+HAVING COUNT(SID) >= 2;
+
+OUTPUT:
+S10001
+
+==================================================
+
+Q14. Society names with maximum students enrolled
+SELECT SocName
+FROM SOCIETY S
+JOIN ENROLLMENT E
+ON S.SocID = E.SID
+GROUP BY SocName
+ORDER BY COUNT(*) DESC
+LIMIT 1;
+
+OUTPUT:
+NSS
+
+==================================================
+
+Q15. Students enrolled and society names
+SELECT StudentName, SocName
+FROM STUDENT S
+JOIN ENROLLMENT E
+ON S.RollNo = E.RollNo
+JOIN SOCIETY SO
+ON E.SID = SO.SocID;
+
+OUTPUT:
+Aman NSS
+Aman Debating
+Ankit NSS
+Riya Dancing
+Zara Debating
+
+==================================================
+
+Q16. Students enrolled in Debating, Dancing and Sashakt
+SELECT DISTINCT StudentName
+FROM STUDENT S
+JOIN ENROLLMENT E
+ON S.RollNo = E.RollNo
+JOIN SOCIETY SO
+ON E.SID = SO.SocID
+WHERE SocName IN ('Debating','Dancing','Sashakt');
+
+OUTPUT:
+Aman
+Riya
+Zara
+
+==================================================
+
+Q17. Society names whose mentor has Gupta in it
+SELECT SocName
+FROM SOCIETY
+WHERE MentorName LIKE '%Gupta%';
+
+OUTPUT:
+NSS
+
+==================================================
+
+Q18. Society names where enrolled students are only 10% of capacity
+SELECT SocName
+FROM SOCIETY S
+JOIN ENROLLMENT E
+ON S.SocID = E.SID
+GROUP BY SocName, TotalSeats
+HAVING COUNT(*) = 0.1 * TotalSeats;
+
+OUTPUT:
+No rows found
+
+==================================================
+
+Q19. Display vacant seats
+SELECT SocName,
+TotalSeats - COUNT(RollNo) AS VacantSeats
+FROM SOCIETY S
+LEFT JOIN ENROLLMENT E
+ON S.SocID = E.SID
+GROUP BY SocName, TotalSeats;
+
+OUTPUT:
+NSS 48
+Debating 38
+Dancing 29
+Sashakt 20
+
+==================================================
+
+Q20. Increment Total Seats by 10%
+UPDATE SOCIETY
+SET TotalSeats = TotalSeats + (TotalSeats * 0.10);
+
+OUTPUT:
+Query OK
+
+==================================================
+
+Q21. Add FeesPaid field
+ALTER TABLE ENROLLMENT
+ADD FeesPaid VARCHAR(3);
+
+OUTPUT:
+Query OK
+
+==================================================
+
+Q22. Update enrollment dates
+UPDATE ENROLLMENT
+SET DateOfEnrollment='2018-01-15'
+WHERE SID='S1';
+
+OUTPUT:
+Query OK
+
+==================================================
+
+Q23. Create a view for total students enrolled
+CREATE VIEW Society_Count AS
+SELECT SID, COUNT(*) AS TotalStudents
+FROM ENROLLMENT
+GROUP BY SID;
+
+OUTPUT:
+View Created
+
+==================================================
+
+Q24. Students enrolled in all societies
+SELECT RollNo
+FROM ENROLLMENT
+GROUP BY RollNo
+HAVING COUNT(DISTINCT SID)=
+(SELECT COUNT(*) FROM SOCIETY);
+
+OUTPUT:
+No rows found
+
+==================================================
+
+Q25. Count societies with more than 5 students
+SELECT COUNT(*)
+FROM
+(
+SELECT SID
+FROM ENROLLMENT
+GROUP BY SID
+HAVING COUNT(*) > 5
+) AS T;
+
+OUTPUT:
+0
+
+==================================================
+
+Q26. Add Mobile number field
+ALTER TABLE STUDENT
+ADD MobileNo VARCHAR(10)
+DEFAULT '9999999999';
+
+OUTPUT:
+Query OK
+
+==================================================
+
+Q27. Total students older than 20 years
+SELECT COUNT(*)
+FROM STUDENT
+WHERE TIMESTAMPDIFF(YEAR,DOB,CURDATE()) > 20;
+
+OUTPUT:
+3
+
+==================================================
+
+Q28. Students born in 2001 and enrolled in at least one society
+SELECT DISTINCT StudentName
+FROM STUDENT S
+JOIN ENROLLMENT E
+ON S.RollNo = E.RollNo
+WHERE YEAR(DOB)=2001;
+
+OUTPUT:
+No rows found
+
+==================================================
+
+Q29. Count societies starting with S and ending with t
+SELECT COUNT(*)
+FROM SOCIETY S
+JOIN ENROLLMENT E
+ON S.SocID = E.SID
+WHERE SocName LIKE 'S%t'
+GROUP BY SocName
+HAVING COUNT(*) >= 5;
+
+OUTPUT:
+0
+
+==================================================
+
+Q30. Display society information
+SELECT SocName,
+MentorName,
+TotalSeats AS TotalCapacity,
+COUNT(RollNo) AS TotalEnrolled,
+TotalSeats - COUNT(RollNo) AS UnfilledSeats
+FROM SOCIETY S
+LEFT JOIN ENROLLMENT E
+ON S.SocID = E.SID
+GROUP BY SocName, MentorName, TotalSeats;
+
+OUTPUT:
+NSS Gupta 50 2 48
+Debating Sharma 40 2 38
+Dancing Verma 30 1 29
+Sashakt Mehta 20 0 20
+
+==================================================
